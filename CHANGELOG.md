@@ -1,3 +1,9 @@
+## [0.4.0](https://github.com/huiitre/pda-cli/compare/v0.3.0...v0.4.0) (2026-05-16)
+
+### Features
+
+* Mise en place de la plupart des commandes d'origine excepté l'export de la base de donnée ([b940978](https://github.com/huiitre/pda-cli/commit/b940978475c1b24990257da4cd982cbd8c9f188f))
+
 ## [0.3.0](https://github.com/huiitre/pda-cli/compare/v0.2.0...v0.3.0) (2026-05-16)
 
 ### Features
