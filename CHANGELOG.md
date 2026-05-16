@@ -1,3 +1,13 @@
+## [1.0.0](https://github.com/huiitre/pda-cli/compare/v0.4.0...v1.0.0) (2026-05-16)
+
+### ⚠ BREAKING CHANGES
+
+* Mise en place des commandes customs
+
+### Features
+
+* Mise en place des commandes customs ([cf19b39](https://github.com/huiitre/pda-cli/commit/cf19b398562362a95498cb5d203fc4fbad5a8b27))
+
 ## [0.4.0](https://github.com/huiitre/pda-cli/compare/v0.3.0...v0.4.0) (2026-05-16)
 
 ### Features
