@@ -1,6 +1,6 @@
 {
   "name": "pda-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "CLI tool for Android PDA development — ADB, Cordova, EasyMobile",
   "type": "module",
   "bin": {

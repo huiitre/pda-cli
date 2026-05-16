@@ -1,3 +1,9 @@
+## [0.2.0](https://github.com/huiitre/pda-cli/compare/v0.1.0...v0.2.0) (2026-05-16)
+
+### Features
+
+* Mise en place workflow de déploiement initial ([6975404](https://github.com/huiitre/pda-cli/commit/6975404624140371fa57a3c4b27f8a497c8683ae))
+
 ## [0.1.0](https://github.com/huiitre/pda-cli/compare/v0.0.0...v0.1.0) (2026-05-16)
 
 ### Features
