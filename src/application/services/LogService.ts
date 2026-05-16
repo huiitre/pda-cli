@@ -1,4 +1,6 @@
 import { appendFileSync, existsSync, mkdirSync } from 'fs'
+
+const pad = (n: number) => String(n).padStart(2, '0')
 import { join } from 'path'
 import type { ConfigService } from './ConfigService.js'
 import { LOGS_DIR } from '../../infrastructure/paths.js'
@@ -24,7 +26,8 @@ export class LogService {
   }
 
   private format(level: string, message: string, data?: unknown): string {
-    const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19)
+    const now = new Date()
+    const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
     const suffix = data !== undefined ? ` — ${JSON.stringify(data)}` : ''
     return `[${timestamp}] [${level}] ${message}${suffix}`
   }
@@ -32,7 +35,8 @@ export class LogService {
   private write(line: string): void {
     try {
       if (!existsSync(LOGS_DIR)) mkdirSync(LOGS_DIR, { recursive: true })
-      const date = new Date().toISOString().slice(0, 10)
+      const now = new Date()
+      const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
       appendFileSync(join(LOGS_DIR, `pda-cli-${date}.log`), line + '\n', 'utf-8')
     } catch {
       // Silencieux : un échec de log ne doit jamais planter la CLI

@@ -9,6 +9,8 @@ export interface ConfigEditableField {
 }
 
 export interface IConfigEditor {
-  // Lance la session interactive. Retourne les changements effectués, ou null si annulé sans modification.
-  prompt(fields: ConfigEditableField[]): Promise<Record<string, string | boolean | number | null> | null>
+  prompt(
+    fields: ConfigEditableField[],
+    onSave: (key: string, value: string | boolean | number | null) => void,
+  ): Promise<void>
 }

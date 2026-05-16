@@ -11,15 +11,15 @@ function formatCurrentValue(value: string | boolean | number | null): string {
 }
 
 export class InquirerConfigEditor implements IConfigEditor {
-  async prompt(fields: ConfigEditableField[]): Promise<Record<string, string | boolean | number | null> | null> {
-    const changes: Record<string, string | boolean | number | null> = {}
+  async prompt(fields: ConfigEditableField[], onSave: (key: string, value: string | boolean | number | null) => void): Promise<void> {
+    const saved: Record<string, string | boolean | number | null> = {}
 
     console.log(chalk.bold('\n  Configuration\n'))
 
     while (true) {
       const fieldsWithCurrentValues = fields.map((f) => ({
         ...f,
-        currentValue: f.key in changes ? changes[f.key] : f.currentValue,
+        currentValue: f.key in saved ? saved[f.key] : f.currentValue,
       }))
 
       let selected: string
@@ -70,7 +70,8 @@ export class InquirerConfigEditor implements IConfigEditor {
           newValue = raw.trim() === '' ? null : raw.trim()
         }
 
-        changes[field.key] = newValue
+        saved[field.key] = newValue
+        onSave(field.key, newValue)
         console.log(chalk.green(`  ✓ ${field.label} → ${formatCurrentValue(newValue)}\n`))
       } catch (err) {
         if (err instanceof Error && err.name === 'ExitPromptError') continue
@@ -78,6 +79,5 @@ export class InquirerConfigEditor implements IConfigEditor {
       }
     }
 
-    return Object.keys(changes).length > 0 ? changes : null
   }
 }

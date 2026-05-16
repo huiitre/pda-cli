@@ -22,12 +22,8 @@ export class EditConfigUseCase {
         currentValue: config[key] as string | boolean | number | null,
       }))
 
-    const changes = await this.editor.prompt(fields)
-
-    if (changes) {
-      for (const [key, value] of Object.entries(changes)) {
-        this.configService.set(key as keyof AppConfig, value as AppConfig[keyof AppConfig])
-      }
-    }
+    await this.editor.prompt(fields, (key, value) => {
+      this.configService.set(key as keyof AppConfig, value as AppConfig[keyof AppConfig])
+    })
   }
 }

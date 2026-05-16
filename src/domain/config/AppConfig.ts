@@ -20,14 +20,14 @@ const AppSchema = z.object({
 })
 
 export const AppConfigSchema = z.object({
-  defaultPda: z.string().default('ct60'),
-  adbPath: z.string().nullable().default(null),
-  debugEnabled: z.boolean().default(false),
-  updateCheckIntervalHours: z.number().int().positive().default(4),
-  lastUpdateCheck: z.string().nullable().default(null),
-  latestVersion: z.string().nullable().default(null),
-  apps: z.array(AppSchema).default([]),
-  activeAppId: z.string().nullable().default(null),
+  defaultPda: z.string().default('ct60').catch('ct60'),
+  adbPath: z.string().nullable().default(null).catch(null),
+  debugEnabled: z.boolean().default(false).catch(false),
+  updateCheckIntervalHours: z.number().int().min(0).default(4).catch(4),
+  lastUpdateCheck: z.string().nullable().default(null).catch(null),
+  latestVersion: z.string().nullable().default(null).catch(null),
+  apps: z.array(AppSchema).default([]).catch([]),
+  activeAppId: z.string().nullable().default(null).catch(null),
 })
 
 export type AppConfig = z.infer<typeof AppConfigSchema>
