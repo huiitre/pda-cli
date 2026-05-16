@@ -2,16 +2,21 @@ import type { Device } from '../../domain/device/Device.js'
 import type { IDeviceRepository } from '../../application/ports/IDeviceRepository.js'
 import type { AdbRunner } from './AdbRunner.js'
 
-const BATCH_COMMAND = [
-  'echo "__MODEL__=$(getprop ro.product.model)"',
-  'echo "__ANDROID__=$(getprop ro.build.version.release)"',
-  'dumpsys package net.distrilog.easymobile 2>/dev/null | grep versionName= || true',
-].join('; ')
+function buildBatchCommand(packageId?: string): string {
+  const parts = [
+    'echo "__MODEL__=$(getprop ro.product.model)"',
+    'echo "__ANDROID__=$(getprop ro.build.version.release)"',
+  ]
+  if (packageId) {
+    parts.push(`dumpsys package ${packageId} 2>/dev/null | grep versionName= || true`)
+  }
+  return parts.join('; ')
+}
 
 export class AdbDeviceRepository implements IDeviceRepository {
   constructor(private readonly adb: AdbRunner) {}
 
-  async list(): Promise<Device[]> {
+  async list(packageId?: string): Promise<Device[]> {
     await this.adb.exec(['devices']).catch(() => undefined)
 
     const output = await this.adb.exec(['devices', '-l'])
@@ -19,36 +24,38 @@ export class AdbDeviceRepository implements IDeviceRepository {
 
     if (serials.length === 0) return []
 
-    return Promise.all(serials.map(s => this.fetchDevice(s)))
+    return Promise.all(serials.map((s) => this.fetchDevice(s, packageId)))
   }
 
   private parseSerials(output: string): string[] {
     return output
       .split('\n')
       .slice(1)
-      .filter(line => /^\S+\s+device(\s|$)/.test(line))
-      .map(line => line.trim().split(/\s+/)[0])
+      .filter((line) => /^\S+\s+device(\s|$)/.test(line))
+      .map((line) => line.trim().split(/\s+/)[0])
       .filter(Boolean)
   }
 
-  private async fetchDevice(serialNumber: string): Promise<Device> {
+  private async fetchDevice(serialNumber: string, packageId?: string): Promise<Device> {
     try {
       const out = await this.adb.exec(
-        ['-s', serialNumber, 'shell', BATCH_COMMAND],
+        ['-s', serialNumber, 'shell', buildBatchCommand(packageId)],
         7000,
       )
       const lines = out.split('\n')
       const get = (prefix: string) =>
-        lines.find(l => l.startsWith(prefix))?.split('=')[1]?.trim() ?? null
+        lines.find((l) => l.startsWith(prefix))?.split('=')[1]?.trim() ?? null
 
       return {
         serialNumber,
         model: get('__MODEL__'),
         androidVersion: get('__ANDROID__'),
-        emVersion: lines.find(l => l.includes('versionName='))?.split('versionName=')[1]?.trim() ?? null,
+        appVersion: packageId
+          ? (lines.find((l) => l.includes('versionName='))?.split('versionName=')[1]?.trim() ?? null)
+          : null,
       }
     } catch {
-      return { serialNumber, model: null, androidVersion: null, emVersion: null }
+      return { serialNumber, model: null, androidVersion: null, appVersion: null }
     }
   }
 }

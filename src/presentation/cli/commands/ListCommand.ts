@@ -17,8 +17,12 @@ export function registerListCommand(program: Command, ctx: AppContext): void {
       const spinner = ora('Recherche des appareils...').start()
 
       try {
+        const activeAppId = ctx.config.get('activeAppId')
+        const apps = ctx.config.get('apps')
+        const activeApp = activeAppId ? apps.find((a) => a.id === activeAppId) : undefined
+
         const useCase = new ListDevicesUseCase(new AdbDeviceRepository(ctx.adbRunner))
-        const devices = await useCase.execute()
+        const devices = await useCase.execute(activeApp?.packageId)
         spinner.stop()
 
         if (options.json) {
@@ -31,17 +35,22 @@ export function registerListCommand(program: Command, ctx: AppContext): void {
           return
         }
 
+        const headers = ['Modèle', 'Numéro de série']
+        if (activeApp) headers.push(`Version ${activeApp.name}`)
+        headers.push('Android')
+
         const table = new Table({
-          head: ['Modèle', 'Numéro de série', 'Version EM', 'Android'].map(h => chalk.cyan.bold(h)),
+          head: headers.map((h) => chalk.cyan.bold(h)),
         })
 
         for (const d of devices) {
-          table.push([
+          const row = [
             d.model ?? chalk.dim('—'),
             d.serialNumber,
-            d.emVersion ?? chalk.dim('—'),
-            d.androidVersion ?? chalk.dim('—'),
-          ])
+          ]
+          if (activeApp) row.push(d.appVersion ?? chalk.dim('—'))
+          row.push(d.androidVersion ?? chalk.dim('—'))
+          table.push(row)
         }
 
         console.log(`\n${chalk.bold(`${devices.length} appareil(s) connecté(s) :`)}\n`)
