@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/huiitre/pda-cli/compare/v1.0.0...v1.1.0) (2026-05-16)
+
+### Features
+
+* Ajout du README et de la documentation ([cad9983](https://github.com/huiitre/pda-cli/commit/cad9983b1bb73981a990015e1e5853d919d21558))
+
 ## [1.0.0](https://github.com/huiitre/pda-cli/compare/v0.4.0...v1.0.0) (2026-05-16)
 
 ### ⚠ BREAKING CHANGES
