@@ -12,7 +12,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "test:cli": "tsx src/index.ts --",
+    "test:cli": "tsx src/index.ts",
     "typecheck": "tsc --noEmit"
   },
   "repository": {
