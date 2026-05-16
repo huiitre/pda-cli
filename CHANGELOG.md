@@ -1,3 +1,9 @@
+## [0.3.0](https://github.com/huiitre/pda-cli/compare/v0.2.0...v0.3.0) (2026-05-16)
+
+### Features
+
+* ajout des commandes pda list, pda help, pda version et pda default ([309124b](https://github.com/huiitre/pda-cli/commit/309124b5f329cb9d71b377a45bbdd2931f9b0a5f))
+
 ## [0.2.0](https://github.com/huiitre/pda-cli/compare/v0.1.0...v0.2.0) (2026-05-16)
 
 ### Features
