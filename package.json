@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "build": "tsup",
-    "dev": "tsx src/index.ts",
+    "dev": "tsup --watch",
+    "test:cli": "tsx src/index.ts --",
     "typecheck": "tsc --noEmit"
   },
   "repository": {
