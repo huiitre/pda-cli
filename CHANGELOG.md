@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/huiitre/pda-cli/compare/v1.1.0...v1.1.1) (2026-05-16)
+
+### Bug Fixes
+
+* Correction d'un bug qui écrasait toutes les valeurs des paramètres si une erreur survenait et correction de l'heure des fichiers de logs ([3922fdc](https://github.com/huiitre/pda-cli/commit/3922fdcd34a244cb4d499f8c74f41c79e617bbf5))
+
 ## [1.1.0](https://github.com/huiitre/pda-cli/compare/v1.0.0...v1.1.0) (2026-05-16)
 
 ### Features
