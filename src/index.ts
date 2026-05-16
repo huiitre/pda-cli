@@ -24,7 +24,7 @@ checkUpdate().catch(() => undefined)
 
 program
   .name('pda')
-  .description('CLI tool for Android PDA development — ADB, Cordova, EasyMobile')
+  .description('CLI tool for Android PDA development — ADB, Cordova')
   .version(version, '-v, --version')
 
 const registry = new CommandRegistry(program, { config: configService, logger, adbRunner, configEditor, version })
