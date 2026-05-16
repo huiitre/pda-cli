@@ -22,7 +22,7 @@ export class AddPackageUseCase {
       id = `${baseId}-${counter++}`
     }
 
-    const newApp: App = { id, ...fields }
+    const newApp: App = { id, ...fields, customCommands: [] }
     this.configService.set('apps', [...apps, newApp])
 
     if (apps.length === 0) {

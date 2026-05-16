@@ -1,5 +1,11 @@
 import { z } from 'zod'
 
+const CustomCommandSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  command: z.string(),
+})
+
 const AppSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -10,6 +16,7 @@ const AppSchema = z.object({
   uninstallCommand: z.string().default('adb -s {serial} uninstall {packageId}'),
   buildDebugCommand: z.string().default('cordova build android --debug'),
   buildReleaseCommand: z.string().default('cordova build android --release -- --packageType=apk'),
+  customCommands: z.array(CustomCommandSchema).default([]),
 })
 
 export const AppConfigSchema = z.object({

@@ -8,6 +8,9 @@ import { AddPackageUseCase } from '../../../application/usecases/AddPackageUseCa
 import { RemovePackageUseCase } from '../../../application/usecases/RemovePackageUseCase.js'
 import { UsePackageUseCase } from '../../../application/usecases/UsePackageUseCase.js'
 import { EditPackageUseCase } from '../../../application/usecases/EditPackageUseCase.js'
+import { AddCustomCommandUseCase } from '../../../application/usecases/AddCustomCommandUseCase.js'
+import { EditCustomCommandUseCase } from '../../../application/usecases/EditCustomCommandUseCase.js'
+import { RemoveCustomCommandUseCase } from '../../../application/usecases/RemoveCustomCommandUseCase.js'
 import type { AppContext } from '../AppContext.js'
 
 const QUIT_KEY = '__quit__'
@@ -117,6 +120,9 @@ export function registerPackageCommand(program: Command, ctx: AppContext): void 
         console.log(`    ${chalk.dim('uninstall  ')} ${chalk.dim(app.uninstallCommand)}`)
         console.log(`    ${chalk.dim('build debug')} ${chalk.dim(app.buildDebugCommand)}`)
         console.log(`    ${chalk.dim('build rel. ')} ${chalk.dim(app.buildReleaseCommand)}`)
+        if (app.customCommands.length > 0) {
+          console.log(`    ${chalk.dim('custom     ')} ${app.customCommands.map((c) => chalk.cyan(c.name)).join(', ')}`)
+        }
         console.log('')
       }
     })
@@ -251,6 +257,179 @@ export function registerPackageCommand(program: Command, ctx: AppContext): void 
 
         const app = new UsePackageUseCase(ctx.config).execute(selected)
         console.log(chalk.green(`\n  ✓ Application active : "${app.name}"\n`))
+      } catch (err) {
+        if (err instanceof Error && err.name === 'ExitPromptError') return
+        throw err
+      }
+    })
+
+  const cmds = pkg
+    .command('commands')
+    .alias('cmds')
+    .description("Gérer les commandes personnalisées de l'application active")
+
+  cmds
+    .command('list')
+    .alias('ls')
+    .description('Lister les commandes personnalisées')
+    .action(() => {
+      const activeAppId = ctx.config.get('activeAppId')
+      const apps = ctx.config.get('apps')
+      const activeApp = activeAppId ? apps.find((a) => a.id === activeAppId) : undefined
+
+      if (!activeApp) {
+        console.error(chalk.red('\n  Aucune application active. Configurez-en une avec `pda package use`.\n'))
+        return
+      }
+
+      if (activeApp.customCommands.length === 0) {
+        console.log(chalk.dim(`\n  Aucune commande personnalisée pour "${activeApp.name}".\n`))
+        return
+      }
+
+      console.log(chalk.bold(`\n  Commandes de "${activeApp.name}"\n`))
+      for (const cmd of activeApp.customCommands) {
+        console.log(`  ${chalk.cyan(cmd.name)}`)
+        console.log(`    ${chalk.dim(cmd.command)}`)
+        console.log('')
+      }
+    })
+
+  cmds
+    .command('add')
+    .description('Ajouter une commande personnalisée')
+    .action(async () => {
+      const activeAppId = ctx.config.get('activeAppId')
+      const apps = ctx.config.get('apps')
+      const activeApp = activeAppId ? apps.find((a) => a.id === activeAppId) : undefined
+
+      if (!activeApp) {
+        console.error(chalk.red('\n  Aucune application active. Configurez-en une avec `pda package use`.\n'))
+        return
+      }
+
+      console.log(chalk.bold(`\n  Nouvelle commande pour "${activeApp.name}"\n`))
+      console.log(chalk.dim('  Placeholders disponibles : {serial}, {packageId}\n'))
+
+      try {
+        const name = await input({ message: 'Nom :' })
+        if (!name.trim()) return
+
+        const command = await input({ message: 'Commande :' })
+        if (!command.trim()) return
+
+        const cmd = new AddCustomCommandUseCase(ctx.config).execute(activeApp.id, name.trim(), command.trim())
+        console.log(chalk.green(`\n  ✓ "${cmd.name}" ajouté\n`))
+      } catch (err) {
+        if (err instanceof Error && err.name === 'ExitPromptError') return
+        if (err instanceof Error) {
+          console.error(chalk.red(`\n  ${err.message}\n`))
+          return
+        }
+        throw err
+      }
+    })
+
+  cmds
+    .command('edit [name]')
+    .description('Modifier une commande personnalisée')
+    .action(async (nameArg?: string) => {
+      const activeAppId = ctx.config.get('activeAppId')
+      const apps = ctx.config.get('apps')
+      const activeApp = activeAppId ? apps.find((a) => a.id === activeAppId) : undefined
+
+      if (!activeApp) {
+        console.error(chalk.red('\n  Aucune application active.\n'))
+        return
+      }
+
+      if (activeApp.customCommands.length === 0) {
+        console.log(chalk.dim('\n  Aucune commande personnalisée à modifier.\n'))
+        return
+      }
+
+      let commandId: string
+      if (nameArg) {
+        const lower = nameArg.toLowerCase()
+        const found = activeApp.customCommands.find((c) => c.name.toLowerCase() === lower)
+        if (!found) {
+          console.error(chalk.red(`\n  Commande "${nameArg}" introuvable.\n`))
+          return
+        }
+        commandId = found.id
+      } else {
+        try {
+          commandId = await select<string>({
+            message: 'Commande à modifier :',
+            choices: activeApp.customCommands.map((c) => ({
+              name: c.name,
+              value: c.id,
+              description: chalk.dim(c.command),
+            })),
+          })
+        } catch (err) {
+          if (err instanceof Error && err.name === 'ExitPromptError') return
+          throw err
+        }
+      }
+
+      const cmd = activeApp.customCommands.find((c) => c.id === commandId)!
+
+      try {
+        const changes: Partial<{ name: string; command: string }> = {}
+
+        const newName = await input({ message: 'Nom :', default: cmd.name })
+        if (newName.trim() && newName.trim() !== cmd.name) changes.name = newName.trim()
+
+        console.log(chalk.dim(`\n  Actuel : ${cmd.command}\n`))
+        const newCommand = await input({ message: 'Commande :', default: cmd.command })
+        if (newCommand.trim() && newCommand.trim() !== cmd.command) changes.command = newCommand.trim()
+
+        if (Object.keys(changes).length === 0) {
+          console.log(chalk.dim('\n  Aucun changement.\n'))
+          return
+        }
+
+        const updated = new EditCustomCommandUseCase(ctx.config).execute(activeApp.id, commandId, changes)
+        console.log(chalk.green(`\n  ✓ "${updated.name}" mis à jour\n`))
+      } catch (err) {
+        if (err instanceof Error && err.name === 'ExitPromptError') return
+        throw err
+      }
+    })
+
+  cmds
+    .command('remove')
+    .alias('rm')
+    .description('Supprimer une commande personnalisée')
+    .action(async () => {
+      const activeAppId = ctx.config.get('activeAppId')
+      const apps = ctx.config.get('apps')
+      const activeApp = activeAppId ? apps.find((a) => a.id === activeAppId) : undefined
+
+      if (!activeApp) {
+        console.error(chalk.red('\n  Aucune application active.\n'))
+        return
+      }
+
+      if (activeApp.customCommands.length === 0) {
+        console.log(chalk.dim('\n  Aucune commande personnalisée à supprimer.\n'))
+        return
+      }
+
+      try {
+        const commandId = await select<string>({
+          message: 'Commande à supprimer :',
+          choices: activeApp.customCommands.map((c) => ({
+            name: c.name,
+            value: c.id,
+            description: chalk.dim(c.command),
+          })),
+        })
+
+        const cmd = activeApp.customCommands.find((c) => c.id === commandId)!
+        new RemoveCustomCommandUseCase(ctx.config).execute(activeApp.id, commandId)
+        console.log(chalk.green(`\n  ✓ "${cmd.name}" supprimé\n`))
       } catch (err) {
         if (err instanceof Error && err.name === 'ExitPromptError') return
         throw err

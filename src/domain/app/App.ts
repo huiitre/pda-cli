@@ -1,3 +1,5 @@
+import type { CustomCommand } from './CustomCommand.js'
+
 export interface App {
   id: string
   name: string
@@ -8,6 +10,7 @@ export interface App {
   uninstallCommand: string
   buildDebugCommand: string
   buildReleaseCommand: string
+  customCommands: CustomCommand[]
 }
 
-export type AppEditableFields = Omit<App, 'id'>
+export type AppEditableFields = Omit<App, 'id' | 'customCommands'>
