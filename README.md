@@ -2,6 +2,8 @@
 
 CLI de développement Android. Déploiement, gestion et debug d'applications Cordova sur PDA (CT45, CT60, EDA52…) via ADB.
 
+> Ce dépôt GitHub est un miroir en lecture seule. Le développement, les tickets et les releases se font sur une instance GitLab privée.
+
 ```
 npm install -g pda-cli
 ```
