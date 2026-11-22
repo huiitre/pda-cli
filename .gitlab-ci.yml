@@ -43,3 +43,6 @@ include:
     inputs:
       stage: release
       release_job: release
+    # Jamais sur un pipeline de tag : le robot du jeton de release qui le lance ne peut pas lire ci-templates.
+    rules:
+      - if: $CI_COMMIT_BRANCH
