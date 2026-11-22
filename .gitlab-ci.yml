@@ -33,10 +33,7 @@ release:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script:
-    - npm run build
-    - npx semantic-release
-    # Vide quand aucun feat/fix ne justifie de version : la recopie GitHub ne fait alors rien.
-    - echo "RELEASE_TAG=$(git tag --points-at HEAD --list 'v*' | head -n1)" > release.env
+    - scripts/ci/release.sh
   artifacts:
     reports:
       dotenv: release.env
