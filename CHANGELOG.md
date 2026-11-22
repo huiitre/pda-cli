@@ -1,3 +1,5 @@
+> Historique figé à la 1.1.1. Les notes des versions suivantes sont dans les releases du dépôt.
+
 ## [1.1.1](https://github.com/huiitre/pda-cli/compare/v1.1.0...v1.1.1) (2026-05-16)
 
 ### Bug Fixes
